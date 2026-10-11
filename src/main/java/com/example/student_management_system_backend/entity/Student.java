@@ -13,7 +13,7 @@ public class Student {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     @Column(name = "student_id")
-    private int id;
+    private Integer id;
 
     @Column(name = "registration_number", nullable = false, unique = true, length = 50)
     private String registrationNumber;
