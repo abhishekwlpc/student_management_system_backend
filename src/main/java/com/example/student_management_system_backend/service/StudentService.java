@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class StudentService {
 
@@ -79,6 +81,105 @@ public class StudentService {
                 savedStudent.getGuardianName(),
                 savedStudent.getGuardianRelationship(),
                 savedStudent.getGuardianTelephone()
+        );
+    }
+
+    public List<StudentResponse> getAllStudents() {
+
+        List<Student> students = studentRepository.findAll();
+        return students.stream().map(student -> new StudentResponse(
+                student.getId(),
+                student.getUser().getUsername(),
+                student.getUser().getEmail(),
+                student.getRegistrationNumber(),
+                student.getFirstName(),
+                student.getLastName(),
+                student.getBirthDate(),
+                student.getAddress(),
+                student.getGuardianName(),
+                student.getGuardianRelationship(),
+                student.getGuardianTelephone()
+        )).toList();
+    }
+
+    @Transactional
+    public StudentResponse editStudent(Integer studentId, StudentRequest studentRequest) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+
+        User user = student.getUser();
+
+        user.setUsername(studentRequest.username());
+        user.setEmail(studentRequest.email());
+        userRepository.save(user);
+
+        student.setRegistrationNumber(studentRequest.registrationNumber());
+        student.setFirstName(studentRequest.firstName());
+        student.setLastName(studentRequest.lastName());
+        student.setBirthDate(studentRequest.birthDate());
+        student.setAddress(studentRequest.address());
+        student.setGuardianName(studentRequest.guardianName());
+        student.setGuardianRelationship(studentRequest.guardianRelationship());
+        student.setGuardianTelephone(studentRequest.guardianTelephone());
+
+        Student updatedStudent = studentRepository.save(student);
+
+        return new StudentResponse(
+                updatedStudent.getId(),
+                updatedStudent.getUser().getUsername(),
+                updatedStudent.getUser().getEmail(),
+                updatedStudent.getRegistrationNumber(),
+                updatedStudent.getFirstName(),
+                updatedStudent.getLastName(),
+                updatedStudent.getBirthDate(),
+                updatedStudent.getAddress(),
+                updatedStudent.getGuardianName(),
+                updatedStudent.getGuardianRelationship(),
+                updatedStudent.getGuardianTelephone()
+        );
+    }
+
+    public StudentResponse getStudentById(Integer studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+        return new StudentResponse(
+                student.getId(),
+                student.getUser().getUsername(),
+                student.getUser().getEmail(),
+                student.getRegistrationNumber(),
+                student.getFirstName(),
+                student.getLastName(),
+                student.getBirthDate(),
+                student.getAddress(),
+                student.getGuardianName(),
+                student.getGuardianRelationship(),
+                student.getGuardianTelephone()
+        );
+    }
+
+    @Transactional
+    public StudentResponse deleteStudent(Integer studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+
+        studentRepository.delete(student);
+
+        User user = userRepository.findById(student.getUser().getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        userRepository.delete(user);
+
+        return new StudentResponse(
+                student.getId(),
+                student.getUser().getUsername(),
+                student.getUser().getEmail(),
+                student.getRegistrationNumber(),
+                student.getFirstName(),
+                student.getLastName(),
+                student.getBirthDate(),
+                student.getAddress(),
+                student.getGuardianName(),
+                student.getGuardianRelationship(),
+                student.getGuardianTelephone()
         );
     }
 }

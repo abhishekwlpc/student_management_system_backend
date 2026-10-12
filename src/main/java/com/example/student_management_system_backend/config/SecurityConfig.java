@@ -1,4 +1,3 @@
-
 package com.example.student_management_system_backend.config;
 
 import org.springframework.context.annotation.Bean;
@@ -27,10 +26,18 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 HttpMethod.POST,
-                                "/api/v1/student"
+                                "/api/v1/**"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
+                                "/api/v1/**"
+                        ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/v1/**"
+                        ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.DELETE,
                                 "/api/v1/**"
                         ).permitAll()
                         .anyRequest().authenticated()
