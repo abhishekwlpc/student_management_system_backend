@@ -1,5 +1,7 @@
 package com.example.student_management_system_backend.security;
 
+import org.springframework.stereotype.Component;
+
 import java.security.SecureRandom;
 
 public class TemporaryPasswordGenerator {

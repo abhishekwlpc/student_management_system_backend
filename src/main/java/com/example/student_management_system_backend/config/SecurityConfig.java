@@ -26,19 +26,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 HttpMethod.POST,
-                                "/api/v1/**"
+                                "/api/v1/students"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/api/v1/**"
+                                "/api/v1/student","/api/v1/student/","/api/v1/students"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.PUT,
-                                "/api/v1/**"
+                                "/api/v1/student/"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.DELETE,
-                                "/api/v1/**"
+                                "/api/v1/student/"
                         ).permitAll()
                         .anyRequest().authenticated()
                 );

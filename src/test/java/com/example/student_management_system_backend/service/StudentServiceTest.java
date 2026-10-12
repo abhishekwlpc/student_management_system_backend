@@ -4,6 +4,8 @@ import com.example.student_management_system_backend.config.PasswordConfig;
 import com.example.student_management_system_backend.dto.request.StudentRequest;
 import com.example.student_management_system_backend.dto.response.StudentResponse;
 import com.example.student_management_system_backend.entity.Student;
+import com.example.student_management_system_backend.entity.User;
+import com.example.student_management_system_backend.enums.Role;
 import com.example.student_management_system_backend.repository.StudentRepository;
 import com.example.student_management_system_backend.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -11,9 +13,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,10 +41,14 @@ public class StudentServiceTest {
     @Autowired
     private EntityManager entityManager;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Test
     public void testCreateStudent() {
 
         // Arrange
+        User user = new User();
         StudentRequest studentRequest = new StudentRequest(
                 "testuser",
                 "testuser@example.com",
@@ -115,8 +124,8 @@ public class StudentServiceTest {
     public void testRejectsDuplicateEmail() {
         // Arrange
         StudentRequest studentRequest = new StudentRequest(
-                "testuser",
-                "testuser@example.com",
+                "testuserduplicate",
+                "testuser8@example.com",
                 "123456A",
                 "Test",
                 "User",
@@ -127,8 +136,8 @@ public class StudentServiceTest {
                 "0771234567"
         );
         StudentRequest studentRequestWithSameEmail = new StudentRequest(
-                "testuser2",
-                "testuser@example.com",
+                "testuserduplicate2",
+                "testuser8@example.com",
                 "123456B",
                 "Test3",
                 "User3",
@@ -185,6 +194,41 @@ public class StudentServiceTest {
 
         // Assert
         assertNull(userRepository.findByUsername("testuserRollback"));
+    }
+
+    @Test
+    public void testUserPasswordAndEmailUsernameStore(){
+
+        // Arrange
+        StudentRequest studentRequest = new StudentRequest(
+                "testuser",
+                "testuser5@example.com",
+                "123456D",
+                "Test",
+                "User",
+                java.time.LocalDate.of(2000, 1, 1),
+                "123 Test Street",
+                "Test Guardian",
+                "Parent",
+                "0771234567"
+        );
+
+        studentService.createStudent(studentRequest);
+
+        // Act
+        entityManager.flush();
+        entityManager.clear();
+        User testUser = userRepository.findByUsername("testuser");
+
+        //Assert
+        assertNotNull(testUser);
+        assertNotNull(testUser.getPasswordHash());
+        assertEquals("{bcrypt}", testUser.getPasswordHash().substring(0,8));
+        assertTrue(testUser.isMustChangePassword());
+        assertEquals(Role.STUDENT, testUser.getRole());
+        assertEquals("testuser", testUser.getUsername());
+        assertEquals("testuser5@example.com", testUser.getEmail());
+
     }
 
 }

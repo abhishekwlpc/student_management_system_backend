@@ -42,15 +42,12 @@ public class StudentService {
 
         User userForStudent = new User();
         String temporaryPassword = TemporaryPasswordGenerator.generate(8);
-        System.out.println("Temporary password for user " + studentRequest.username() + ": " + temporaryPassword);
         userForStudent.setMustChangePassword(true);
-        // String hashedPassword = passwordEncoder.encode(temporaryPassword);
+        String hashedPassword = passwordEncoder.encode(temporaryPassword);
         userForStudent.setUsername(studentRequest.username());
         userForStudent.setEmail(studentRequest.email());
-        userForStudent.setPasswordHash(temporaryPassword);
+        userForStudent.setPasswordHash(hashedPassword);
         userForStudent.setRole(Role.STUDENT);
-
-        System.out.println("Password : " + userForStudent.getPasswordHash());
 
         User savedUser = userRepository.save(userForStudent);
 
