@@ -30,7 +30,7 @@ public class StudentRepositoryTest {
         user.setUsername("abhishek");
         user.setEmail("abhishek@example.com");
         user.setPasswordHash("password");
-        user.setRole(Role.STUDENT);
+        user.setRole(Role.ROLE_STUDENT);
 
         User savedUser = userRepository.saveAndFlush(user);
 
@@ -69,7 +69,7 @@ public class StudentRepositoryTest {
         user.setUsername("abhishek");
         user.setEmail("abhishek@example.com");
         user.setPasswordHash("password");
-        user.setRole(Role.STUDENT);
+        user.setRole(Role.ROLE_STUDENT);
 
         User savedUser = userRepository.saveAndFlush(user);
 
@@ -111,7 +111,7 @@ public class StudentRepositoryTest {
         user.setUsername("abhishek");
         user.setEmail("abhishek@example.com");
         user.setPasswordHash("password");
-        user.setRole(Role.STUDENT);
+        user.setRole(Role.ROLE_STUDENT);
 
         User savedUser = userRepository.saveAndFlush(user);
 
@@ -138,7 +138,7 @@ public class StudentRepositoryTest {
         // Assert
         assertNotNull(foundStudent);
         assertNotNull(foundStudent.getUser());
-        assertEquals(Role.STUDENT, foundStudent.getUser().getRole());
+        assertEquals(Role.ROLE_STUDENT, foundStudent.getUser().getRole());
     }
 
 }

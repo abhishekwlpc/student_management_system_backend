@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -158,7 +159,9 @@ public class StudentServiceTest {
         assertThrowsExactly(IllegalArgumentException.class, () -> {
             studentService.createStudent(studentRequestWithSameEmail);
         });
-        assertNull(userRepository.findByUsername("testuser2"));
+
+        User user = userRepository.findByEmail("testuser8@example.com");
+        assertNotEquals("testuserduplicate2" , user.getUsername());
     }
 
     @Test
@@ -193,7 +196,7 @@ public class StudentServiceTest {
         entityManager.clear();
 
         // Assert
-        assertNull(userRepository.findByUsername("testuserRollback"));
+        assertNull(userRepository.findByEmail("testuser4@example.com"));
     }
 
     @Test
@@ -218,14 +221,14 @@ public class StudentServiceTest {
         // Act
         entityManager.flush();
         entityManager.clear();
-        User testUser = userRepository.findByUsername("testuser");
+        User testUser = userRepository.findByEmail("testuser5@example.com");
 
         //Assert
         assertNotNull(testUser);
         assertNotNull(testUser.getPasswordHash());
         assertEquals("{bcrypt}", testUser.getPasswordHash().substring(0,8));
         assertTrue(testUser.isMustChangePassword());
-        assertEquals(Role.STUDENT, testUser.getRole());
+        assertEquals(Role.ROLE_STUDENT, testUser.getRole());
         assertEquals("testuser", testUser.getUsername());
         assertEquals("testuser5@example.com", testUser.getEmail());
 

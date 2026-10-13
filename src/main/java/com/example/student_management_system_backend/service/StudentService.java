@@ -47,7 +47,7 @@ public class StudentService {
         userForStudent.setUsername(studentRequest.username());
         userForStudent.setEmail(studentRequest.email());
         userForStudent.setPasswordHash(hashedPassword);
-        userForStudent.setRole(Role.STUDENT);
+        userForStudent.setRole(Role.ROLE_STUDENT);
 
         User savedUser = userRepository.save(userForStudent);
 
