@@ -51,7 +51,6 @@ public class StudentService {
 
         User savedUser = userRepository.save(userForStudent);
 
-
         Student studentToSave = new Student();
         studentToSave.setUser(savedUser);
         studentToSave.setRegistrationNumber(studentRequest.registrationNumber());

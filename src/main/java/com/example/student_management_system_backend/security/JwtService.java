@@ -1,5 +1,6 @@
 package com.example.student_management_system_backend.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -18,7 +19,7 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long expiration;
 
-    public SecretKey getSigningKey(){
+    private SecretKey getSigningKey(){
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -34,6 +35,18 @@ public class JwtService {
                 .expiration(expirationDate)
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    public String extractUsernameFromToken(String token){
+
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims.getSubject();
+
     }
 
 

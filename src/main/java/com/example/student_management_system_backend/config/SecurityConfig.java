@@ -1,6 +1,8 @@
 package com.example.student_management_system_backend.config;
 
 import com.example.student_management_system_backend.security.CustomUserDetailsService;
+import com.example.student_management_system_backend.security.JwtAuthenticationFilter;
+import com.example.student_management_system_backend.security.JwtService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -10,9 +12,10 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.stereotype.Component;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -22,6 +25,15 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+    private final JwtService jwtService;
+    private final CustomUserDetailsService customUserDetailsService;
+
+    public SecurityConfig(JwtService jwtService, CustomUserDetailsService customUserDetailsService){
+        this.jwtService = jwtService;
+        this.customUserDetailsService = customUserDetailsService;
+
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http) throws Exception {
@@ -29,25 +41,47 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 HttpMethod.POST,
-                                "/api/v1/students"
+                                "/api/v1/auth/login"
                         ).permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/student"
+                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/api/v1/student","/api/v1/student/","/api/v1/students"
-                        ).permitAll()
+                                "/api/v1/students",
+                                "/api/v1/student",
+                                "/api/v1/student/{id}"
+                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+
                         .requestMatchers(
                                 HttpMethod.PUT,
-                                "/api/v1/student/"
-                        ).permitAll()
+                                "/api/v1/student/{id}"
+                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+
                         .requestMatchers(
                                 HttpMethod.DELETE,
-                                "/api/v1/student/"
-                        ).permitAll()
+                                "/api/v1/student/{id}"
+                        ).hasAuthority("ROLE_ADMIN")
+
                         .anyRequest().authenticated()
                 );
+
+        http.addFilterBefore(
+                new JwtAuthenticationFilter(
+                        jwtService,
+                        customUserDetailsService
+                ),
+                UsernamePasswordAuthenticationFilter.class
+        );
 
         return http.build();
     }
