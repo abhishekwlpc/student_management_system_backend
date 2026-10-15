@@ -8,11 +8,14 @@ import com.example.student_management_system_backend.enums.Role;
 import com.example.student_management_system_backend.repository.StudentRepository;
 import com.example.student_management_system_backend.repository.UserRepository;
 import com.example.student_management_system_backend.security.TemporaryPasswordGenerator;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class StudentService {
@@ -135,9 +138,37 @@ public class StudentService {
         );
     }
 
-    public StudentResponse getStudentById(Integer studentId) {
+    public StudentResponse getStudentById(Integer studentId, Authentication authentication) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+        String username = authentication.getName();
+
+        boolean isRoleStudent = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        Role.ROLE_STUDENT.name().equals(authority.getAuthority()));
+
+        if(isRoleStudent){
+            if(Objects.equals(username, student.getUser().getUsername())){
+
+                return new StudentResponse(
+                        student.getId(),
+                        student.getUser().getUsername(),
+                        student.getUser().getEmail(),
+                        student.getRegistrationNumber(),
+                        student.getFirstName(),
+                        student.getLastName(),
+                        student.getBirthDate(),
+                        student.getAddress(),
+                        student.getGuardianName(),
+                        student.getGuardianRelationship(),
+                        student.getGuardianTelephone()
+                );
+
+            }else{
+                throw new AccessDeniedException("Access Denied!");
+            }
+        }
         return new StudentResponse(
                 student.getId(),
                 student.getUser().getUsername(),
@@ -151,6 +182,27 @@ public class StudentService {
                 student.getGuardianRelationship(),
                 student.getGuardianTelephone()
         );
+    }
+
+    public StudentResponse getOwnStudentDetails(String username){
+
+        Student student = studentRepository.findByUser_Username(username)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+
+        return new StudentResponse(
+                student.getId(),
+                student.getUser().getUsername(),
+                student.getUser().getEmail(),
+                student.getRegistrationNumber(),
+                student.getFirstName(),
+                student.getLastName(),
+                student.getBirthDate(),
+                student.getAddress(),
+                student.getGuardianName(),
+                student.getGuardianRelationship(),
+                student.getGuardianTelephone()
+        );
+
     }
 
     @Transactional

@@ -57,10 +57,17 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 HttpMethod.GET,
+                                "/api/v1/student/me"
+                        ).hasAnyAuthority("ROLE_STUDENT")
+                        .requestMatchers(
+                                HttpMethod.GET,
                                 "/api/v1/students",
-                                "/api/v1/student",
-                                "/api/v1/student/{id}"
+                                "/api/v1/student"
                         ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/student/{id}"
+                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF", "ROLE_STUDENT")
 
                         .requestMatchers(
                                 HttpMethod.PUT,

@@ -4,6 +4,7 @@ import com.example.student_management_system_backend.dto.request.StudentRequest;
 import com.example.student_management_system_backend.dto.response.StudentResponse;
 import com.example.student_management_system_backend.service.StudentService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 public class StudentController {
 
     private final StudentService studentService;
+
 
     public StudentController(StudentService studentService) {
         this.studentService = studentService;
@@ -34,8 +36,14 @@ public class StudentController {
     }
 
     @GetMapping("/student/{id}")
-    public StudentResponse getStudentById(@PathVariable Integer id) {
-        return studentService.getStudentById(id);
+    public StudentResponse getStudentById(@PathVariable Integer id, Authentication authentication) {
+        return studentService.getStudentById(id, authentication);
+    }
+
+    @GetMapping("/student/me")
+    public StudentResponse getOwnStudent(Authentication authentication){
+        String username = authentication.getName();
+        return studentService.getOwnStudentDetails(username);
     }
 
     @DeleteMapping("/student/{id}")

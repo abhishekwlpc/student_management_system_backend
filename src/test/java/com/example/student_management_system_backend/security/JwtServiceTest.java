@@ -126,7 +126,11 @@ public class JwtServiceTest {
         SecretKey wrongSecreter =Keys.hmacShaKeyFor(keyBytes);
 
         // Act & Assert
-        assertThrowsExactly(SignatureException.class, () -> jwtService.extractUsernameFromToken(token));
+        assertThrowsExactly(SignatureException.class, () -> Jwts.parser()
+                .verifyWith(wrongSecreter)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload());
     }
 
     @Test
