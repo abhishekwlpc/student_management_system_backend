@@ -5,6 +5,9 @@ import com.example.student_management_system_backend.dto.response.StudentRespons
 import com.example.student_management_system_backend.entity.Student;
 import com.example.student_management_system_backend.entity.User;
 import com.example.student_management_system_backend.enums.Role;
+import com.example.student_management_system_backend.exception.customException.AlreadyExistsException;
+import com.example.student_management_system_backend.exception.customException.StudentNotFoundException;
+import com.example.student_management_system_backend.exception.customException.UserNotFoundException;
 import com.example.student_management_system_backend.repository.StudentRepository;
 import com.example.student_management_system_backend.repository.UserRepository;
 import com.example.student_management_system_backend.security.TemporaryPasswordGenerator;
@@ -34,13 +37,13 @@ public class StudentService {
     public StudentResponse createStudent(StudentRequest studentRequest) {
 
         if (userRepository.existsByUsername(studentRequest.username())) {
-            throw new IllegalArgumentException("Username is already taken");
+            throw new AlreadyExistsException("Username is already taken");
         }
         if (userRepository.existsByEmail(studentRequest.email())) {
-            throw new IllegalArgumentException("Email is already registered");
+            throw new AlreadyExistsException("Email is already registered");
         }
         if(studentRepository.existsByRegistrationNumber(studentRequest.registrationNumber())) {
-            throw new IllegalArgumentException("Student with this registration number already exists");
+            throw new AlreadyExistsException("Student with this registration number already exists");
         }
 
         User userForStudent = new User();
@@ -104,7 +107,7 @@ public class StudentService {
     @Transactional
     public StudentResponse editStudent(Integer studentId, StudentRequest studentRequest) {
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
 
         User user = student.getUser();
 
@@ -140,7 +143,7 @@ public class StudentService {
 
     public StudentResponse getStudentById(Integer studentId, Authentication authentication) {
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
         String username = authentication.getName();
 
         boolean isRoleStudent = authentication.getAuthorities()
@@ -187,7 +190,7 @@ public class StudentService {
     public StudentResponse getOwnStudentDetails(String username){
 
         Student student = studentRepository.findByUser_Username(username)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
 
         return new StudentResponse(
                 student.getId(),
@@ -208,12 +211,12 @@ public class StudentService {
     @Transactional
     public StudentResponse deleteStudent(Integer studentId) {
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
 
         studentRepository.delete(student);
 
         User user = userRepository.findById(student.getUser().getId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         userRepository.delete(user);
 
         return new StudentResponse(

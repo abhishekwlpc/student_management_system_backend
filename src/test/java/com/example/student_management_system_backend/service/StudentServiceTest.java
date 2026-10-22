@@ -6,6 +6,7 @@ import com.example.student_management_system_backend.dto.response.StudentRespons
 import com.example.student_management_system_backend.entity.Student;
 import com.example.student_management_system_backend.entity.User;
 import com.example.student_management_system_backend.enums.Role;
+import com.example.student_management_system_backend.exception.customException.AlreadyExistsException;
 import com.example.student_management_system_backend.repository.StudentRepository;
 import com.example.student_management_system_backend.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -124,7 +125,7 @@ public class StudentServiceTest {
 
         // Assert
         assertNotNull(studentResponse);
-        assertThrowsExactly(IllegalArgumentException.class, () -> {
+        assertThrowsExactly(AlreadyExistsException.class, () -> {
             studentService.createStudent(studentRequestWithSameUsername);
         });
     }
@@ -164,7 +165,7 @@ public class StudentServiceTest {
 
         // Assert
         assertNotNull(studentResponse);
-        assertThrowsExactly(IllegalArgumentException.class, () -> {
+        assertThrowsExactly(AlreadyExistsException.class, () -> {
             studentService.createStudent(studentRequestWithSameEmail);
         });
 

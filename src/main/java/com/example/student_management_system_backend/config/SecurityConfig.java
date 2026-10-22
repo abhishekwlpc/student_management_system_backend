@@ -3,6 +3,7 @@ package com.example.student_management_system_backend.config;
 import com.example.student_management_system_backend.security.CustomUserDetailsService;
 import com.example.student_management_system_backend.security.JwtAuthenticationFilter;
 import com.example.student_management_system_backend.security.JwtService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -43,6 +44,18 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"message\":\"Authentication required\"}");
+                })
+                                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                                    response.setContentType("application/json");
+                                    response.getWriter().write("{\"message\":\"Access Denied\"}");
+                                })
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
